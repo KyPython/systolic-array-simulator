@@ -1,71 +1,58 @@
-Systolic Array Matrix Multiplication (Python + Colab)
-This project is a small Python simulator for systolic array matrix multiplication, implemented in a Google Colab notebook.
+# 💻 Systolic Array Matrix Multiplication (Python + Colab)
 
-Instead of running matrix multiplication as a long serial loop on a CPU, this notebook models it as a grid of simple processing elements (PEs). Each PE sits in a fixed position, holds a tiny accumulator, and on every “clock cycle”:
+This project provides a small **Python simulator** for **systolic array matrix multiplication**, implemented as a Google Colab notebook.
 
-Takes one value from the left (from matrix A).
+Instead of running matrix multiplication as a long serial loop on a CPU, this notebook models it as a grid of simple **processing elements (PEs)**. This architecture is central to modern AI accelerators. 
 
-Takes one value from the top (from matrix B).
+---
 
-Multiplies them, adds the result to its local sum, and passes the values along to its neighbors.
+## ✨ The Core Concept: Systolic Array
 
-What’s inside
-ProcessingElement class
+A systolic array executes matrix multiplication by using a fixed, interconnected grid of PEs.
 
-Simulates a single PE with:
+On every **"clock cycle"**, each PE performs the following actions:
+1.  Takes one value from the left (from **Matrix A**).
+2.  Takes one value from the top (from **Matrix B**).
+3.  Multiplies them, adds the result to its local sum (**Multiply-Accumulate** or **MAC** operation).
+4.  Passes the values along to its neighbors (Matrix A value to the right, Matrix B value to the bottom).
 
-Registers for A and B inputs.
+This design allows for high **parallelism** and **data reuse**, minimizing memory traffic—key features of hardware accelerators like **Google TPUs**.
 
-An accumulator that performs multiply-accumulate (MAC) each cycle.
+---
 
-SystolicArray class
+## 🏗️ What's Inside
 
-Builds an N×N grid of PEs.
+The simulator is built around the following components:
 
-Streams:
+| Class/Function | Description | Role |
+| :--- | :--- | :--- |
+| **`ProcessingElement`** class | Simulates a single PE. | Contains registers for **A** and **B** inputs and an **accumulator** that performs the MAC operation each cycle. |
+| **`SystolicArray`** class | Builds an **N×N grid** of PEs. | Streams **Matrix A** left $\rightarrow$ right and **Matrix B** top $\rightarrow$ bottom. Runs for a fixed number of cycles, then reads out each PE's final accumulator value as one entry of the result matrix. |
+| **`standard_matmul`** function | Reference implementation. | Performs standard CPU-style matrix multiplication (triple nested loop) for correctness verification. |
+| **`compare_implementations`** helper | Verification routine. | Runs both `standard_matmul` and `SystolicArray.multiply` on the same input matrices and prints the results side-by-side. |
+| **2×2 “detailed operation” example** | Debugging and visualization. | A small run with verbose output that shows how each PE’s accumulator changes cycle-by-cycle, allowing you to trace the result's accumulation step-by-step. |
 
-Matrix A left → right across the rows.
+---
 
-Matrix B top → bottom down the columns.
+## ▶️ How to Run
 
-Runs for a fixed number of cycles and then reads out each PE’s accumulator as one entry of the result matrix.
+The entire project is contained in a single Colab notebook. **No external libraries are required** beyond standard Python.
 
-standard_matmul function
+1.  **Open the notebook** in Google Colab.
+2.  Run the cells in the following order:
+    * Define the `ProcessingElement` and `SystolicArray` classes.
+    * Define the `standard_matmul` and `compare_implementations` functions.
+    * Run `compare_implementations()` to compare the **CPU** result against the **Systolic Array** result.
+    * *Optionally*, run the **2×2 verbose example** to inspect the internal accumulator states over time.
 
-Reference CPU-style matrix multiplication (triple nested loop) used to verify correctness.
+---
 
-compare_implementations helper
+## 🧠 Why This Matters
 
-Runs both standard_matmul and SystolicArray.multiply on the same input matrices.
+Systolic arrays are not just a theoretical concept; they are the foundation for high-performance computing in modern machine learning.
 
-Prints both results side by side.
+* They perform many MAC operations **in parallel**.
+* They use a **predictable dataflow** (the "systolic" rhythm) that is highly efficient for hardware implementation.
+* They **reuse data locally** within the PE grid, significantly reducing the bottleneck of retrieving data from off-chip memory.
 
-2×2 “detailed operation” example
-
-A small run with verbose output that shows how each PE’s accumulator changes over cycles, so you can see the result “grow” step by step.
-
-How to run
-Open the notebook in Google Colab.
-
-Run cells in order:
-
-Define ProcessingElement and SystolicArray.
-
-Define standard_matmul and compare_implementations.
-
-Run compare_implementations() to compare CPU vs systolic array.
-
-Optionally run the 2×2 verbose example to inspect accumulator states.
-
-No external libraries are required beyond standard Python.
-
-Why this matters
-Systolic arrays are a core idea behind modern AI accelerators (like TPUs and specialized AI GPUs). They:
-
-Perform many MAC operations in parallel.
-
-Use predictable dataflow.
-
-Reuse data locally to reduce memory traffic.
-
-This notebook is a small, educational bridge between “I can write matrix multiplication in Python” and “I understand how hardware like a systolic array can accelerate neural network workloads.
+This notebook serves as an educational bridge between writing basic matrix multiplication code and understanding how specialized **hardware** can fundamentally accelerate demanding neural network workloads.
